@@ -10,14 +10,29 @@ function preload() {
 
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL);
-    player = new Player(playerSize);
+    // p5.js の内部 WebGL コンテキストを取得
+    let gl = this._renderer.GL;
 
+    // WEBGL_debug_renderer_info 拡張を取得
+    let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    if (debugInfo) {
+        let vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+        let renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        console.log("GPU Vendor: " + vendor);
+        console.log("GPU Renderer: " + renderer);
+    } else {
+        console.log("WEBGL_debug_renderer_info is not available.");
+    }
+
+    // その他の初期化処理
+    player = new Player(playerSize);
     for (let i = 0; i < numObstacles; i++) {
         let x = random(-500, 500);
         let z = random(-500, 500);
         obstacles.push(new Obstacle(x, 0, z));
     }
 }
+
 
 function draw() {
     background(200, 220, 255);

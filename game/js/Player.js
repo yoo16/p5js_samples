@@ -5,7 +5,7 @@ class Player {
         this.velocity = createVector(0, 0, 0);
         this.grounded = false;
         this.speed = 1;
-        this.jumpSpeed = 22;
+        this.jumpSpeed = 10;
     }
 
     update() {
@@ -67,7 +67,7 @@ class Player {
         let verticalTestPos = createVector(this.pos.x, newY, this.pos.z);
         let verticalCollision = false;
         let collidedObstacle = null;
-
+    
         for (let obs of obstacles) {
             if (sphereBoxCollision(verticalTestPos, this.size / 2, obs)) {
                 verticalCollision = true;
@@ -75,18 +75,36 @@ class Player {
                 break;
             }
         }
-
+    
         if (!verticalCollision) {
+            // 衝突がなければそのまま移動
             this.pos.y = newY;
         } else {
-            // 障害物に衝突した場合、障害物の上にプレイヤーを配置
-            if (collidedObstacle) {
-                // 障害物の表示上の頂点（Y座標）は、translate()時の補正と合わせる必要がある
-                let topY = -(collidedObstacle.pos.y + collidedObstacle.h / 2 - 1);
-                this.pos.y = topY + this.size / 2;
+            // 衝突があった場合、上昇中か落下中かで処理を分ける
+            if (this.velocity.y > 0) {
+                // 落下中の場合：障害物の上に着地させる
+                if (collidedObstacle) {
+                    // 障害物の上面の Y 座標
+                    let topY = -(collidedObstacle.pos.y + collidedObstacle.h / 2 - 1);
+                    // プレイヤーの底部が障害物の上面に触れるように調整
+                    this.pos.y = topY - this.size / 2;
+                }
+                this.grounded = true;
+            } else if (this.velocity.y < 0) {
+                // 上昇中の場合：障害物の下側にぶつかったとみなす
+                if (collidedObstacle) {
+                    // 障害物の底面の Y 座標を計算
+                    // 障害物は translate(this.pos.x, -(box.pos.y + box.h/2 - 1), this.pos.z) で描画されるので、
+                    // 障害物の底面は、障害物の中心 - (h/2) となる。ここでは底面（障害物の下側）の Y 座標:
+                    let bottomY = -(collidedObstacle.pos.y - collidedObstacle.h / 2 - 1);
+                    // プレイヤーの頭部が障害物の底面に触れるように調整
+                    this.pos.y = bottomY + this.size / 2;
+                }
+                // 上昇中の場合は着地状態にはしない
+                this.grounded = false;
             }
+            // 衝突時は垂直方向の速度をリセット
             this.velocity.y = 0;
-            this.grounded = true;
         }
     }
 
