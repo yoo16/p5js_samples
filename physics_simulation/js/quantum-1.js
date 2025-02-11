@@ -18,6 +18,9 @@ function setup() {
     }
 }
 
+/**
+ * draw()
+ */
 function draw() {
     background(0);
     stroke(255);
@@ -34,6 +37,6 @@ function draw() {
         let y = height / 2 + sumWave * 20;
         ellipse(x, y, 3, 3);
     }
-
-    time += speed; // 時間更新
+    // 時間更新
+    time += speed;
 }
